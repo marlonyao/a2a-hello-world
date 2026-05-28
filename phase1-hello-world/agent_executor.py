@@ -23,15 +23,15 @@ from a2a.types import TaskState
 
 # ── 你的 Agent 业务逻辑 ─────────────────────────────
 class MyAgent:
-    """你的 Agent 核心逻辑，这里可以接入 LLM、工具调用等"""
+    """你的 Agent 核心逻辑，已接入 DeepSeek V4 Flash"""
+
+    SYSTEM_PROMPT = "你是一个友好的 A2A 协议学习助手。用简洁有趣的方式回答用户的问题。"
 
     async def invoke(self, user_message: str) -> str:
-        # 目前先做一个简单的回声 + 解释，后续可以接入智谱 GLM
-        return (
-            f"👋 你好！我是你的第一个 A2A Agent。\n"
-            f"你发送的消息是：「{user_message}」\n"
-            f"我已经成功收到了！这是 Phase 2 的 Hello World 响应。"
-        )
+        import sys, os
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from llm_client import chat
+        return await chat(self.SYSTEM_PROMPT, user_message)
 
 
 # ── A2A 框架对接层 ─────────────────────────────────

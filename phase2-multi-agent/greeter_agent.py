@@ -18,12 +18,13 @@ from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentSkill, 
 
 
 class GreeterAgent:
+    SYSTEM_PROMPT = "你是打招呼专家 Greeter Agent。热情友好地回复每条消息，可以聊天、介绍自己、回答简单问题。回复要简洁有趣。"
+
     async def invoke(self, text: str) -> str:
-        return (
-            f"🎉 你好！我是 Greeter Agent（打招呼专家）。\n"
-            f"你说的是：「{text}」\n"
-            f"很高兴收到你的消息！有什么我可以帮忙的吗？"
-        )
+        import sys, os
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from llm_client import chat
+        return await chat(self.SYSTEM_PROMPT, text)
 
 
 class GreeterExecutor(AgentExecutor):

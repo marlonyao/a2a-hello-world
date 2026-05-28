@@ -1,0 +1,6 @@
+openai
+a2a-sdk
+httpx
+starlette
+uvicorn
+sse-starlette

@@ -105,10 +105,13 @@ async def handle_send_message(params: dict) -> dict:
     context_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
 
-    # Agent 逻辑（简单 echo + 装饰）
-    agent_reply = (
-        f"⚡ [原生Agent] 收到你的消息：「{user_text}」\n"
-        f"这个 Agent 完全不用 a2a-sdk，纯手写 JSON-RPC！"
+    # Agent 逻辑（调用 DeepSeek V4 Flash）
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from llm_client import chat
+    agent_reply = await chat(
+        "你是原生 A2A Agent，不依赖任何 SDK 实现了完整的 A2A 协议。简洁友好地回复用户。",
+        user_text,
     )
 
     # 构造 Task 对象

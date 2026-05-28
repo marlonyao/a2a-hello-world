@@ -32,8 +32,10 @@ a2a-learning/
 ```
 python3 -m venv venv
 source venv/bin/activate
-pip install a2a-sdk httpx starlette uvicorn sse-starlette
+pip install -r requirements.txt
 ```
+
+> 🔑 API Key 已内置于 `llm_client.py`，也可通过环境变量 `DEEPSEEK_API_KEY` 覆盖。
 
 ---
 

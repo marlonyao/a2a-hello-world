@@ -18,22 +18,17 @@ from a2a.types import AgentCapabilities, AgentCard, AgentInterface, AgentSkill, 
 
 
 class TranslatorAgent:
-    async def invoke(self, text: str) -> str:
-        # 简单的模拟翻译（后续可接入智谱 GLM）
-        has_chinese = any('\u4e00' <= c <= '\u9fff' for c in text)
-        if has_chinese:
-            translated = f"[Simulated EN Translation] {text}"
-            direction = "中 → 英"
-        else:
-            translated = f"[模拟中文翻译] {text}"
-            direction = "英 → 中"
+    SYSTEM_PROMPT = (
+        "你是翻译专家 Translator Agent，支持中英文互译。"
+        "用户发给你任何文本，你都直接给出翻译结果，不需要额外解释。"
+        "如果输入是中文，翻译成英文；如果输入是英文，翻译成中文。"
+    )
 
-        return (
-            f"🌐 我是 Translator Agent（翻译专家）。\n"
-            f"翻译方向：{direction}\n"
-            f"原文：{text}\n"
-            f"译文：{translated}"
-        )
+    async def invoke(self, text: str) -> str:
+        import sys, os
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from llm_client import chat
+        return await chat(self.SYSTEM_PROMPT, text)
 
 
 class TranslatorExecutor(AgentExecutor):

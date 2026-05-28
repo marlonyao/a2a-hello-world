@@ -36,19 +36,34 @@ AGENT_URLS = {
 
 
 class OrchestratorAgent:
-    """调度员 Agent：根据用户意图，决定调用哪个下游 Agent"""
+    """调度员 Agent：用 LLM 分析用户意图，决定调用哪个下游 Agent"""
 
-    def _parse_intent(self, text: str) -> list[str]:
-        """简单意图识别（后续可接入 LLM）"""
+    INTENT_PROMPT = """你是一个意图识别器。根据用户消息，判断应该调用哪些 Agent。
+
+可用的 Agent：
+- greeter: 打招呼、聊天、日常对话
+- translator: 翻译相关的请求（中英文翻译）
+
+请只输出 Agent 名称，多个用逗号分隔。例如：greeter 或 translator 或 greeter,translator
+不要输出其他任何内容。"""
+
+    async def _parse_intent(self, text: str) -> list[str]:
+        """用 LLM 做意图识别"""
+        import sys, os
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from llm_client import chat
+
+        result = await chat(self.INTENT_PROMPT, text)
         agents = []
-        if any(kw in text for kw in ["翻译", "translate", "英文", "中文", "英语"]):
-            agents.append("translator")
-        if not agents:
-            agents.append("greeter")
-        return agents
+        for name in result.strip().split(","):
+            name = name.strip().lower()
+            if name in AGENT_URLS and name not in agents:
+                agents.append(name)
+        # 默认 fallback 到 greeter
+        return agents if agents else ["greeter"]
 
     async def invoke(self, text: str) -> str:
-        intent_agents = self._parse_intent(text)
+        intent_agents = await self._parse_intent(text)
         results = []
 
         async with httpx.AsyncClient() as httpx_client:
